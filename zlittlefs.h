@@ -8,6 +8,7 @@
 #define CFGFILE "/config.json"
 
 struct iData{
+  int bootCount = 123;
   char name[33] = "Densimètre num 1";
   uint32_t sleeptime = 15 * 60;
   int16_t Offset[6];    //axOffsetInternal, ayOffsetInternal, azOffsetInternal, axOffset, ayOffset, azOffset

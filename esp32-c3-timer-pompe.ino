@@ -136,7 +136,7 @@ void setup() {
       readFile(LittleFS, "/config.json");     // Read the complete file
     #endif
 
-
+    // saveConfig();
     readConfig();
 
 
