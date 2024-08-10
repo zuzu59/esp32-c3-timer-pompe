@@ -1,5 +1,5 @@
 # esp32-c3-timer-pompe
-Petit timer pour une pompe de fonctaine pour enfants
+Petit timer pour une pompe de fontaine pour enfants
 
 ESP32-c3 super mini utilisé pour faire juste office de timer pour une pompe de fontaine pour enfants.
 

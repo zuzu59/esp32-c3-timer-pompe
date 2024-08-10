@@ -5,7 +5,7 @@
 //
 // ATTENTION, ce code a été testé sur un esp32-c3 super mini. Pas testé sur les autres boards !
 //
-#define zVERSION        "zf240810.1450"
+#define zVERSION        "zf240810.1519"
 #define zHOST           "tmr_pmp_1"             // ATTENTION, tout en minuscule
 #define zDSLEEP         1                       // 0 ou 1 !
 #define TIME_TO_SLEEP   60                      // dSleep en secondes 
@@ -52,7 +52,7 @@ https://chat.mistral.ai/    pour toute la partie API REST et wifiAuto ᕗ
 
 
 
-// #define DEBUG true
+#define DEBUG true
 // #undef DEBUG
 
 
@@ -66,16 +66,27 @@ const int buttonPin = 9;          // the number of the pushbutton pin
 #include "zSonarpulse.h"
 
 
-// WIFI
-#include "zWifi.h"
+// // WIFI
+// #include "zWifi.h"
 
 
-// OTA WEB server
-#include "otaWebServer.h"
+// // OTA WEB server
+// #include "otaWebServer.h"
 
 
-// MQTT
-#include "zMqtt.h"
+// // MQTT
+// #include "zMqtt.h"
+
+float sensorValue1 = 0;  // variable to store the value coming from the sensor 1
+float sensorValue2 = 0;  // variable to store the value coming from the sensor 2
+float sensorValue3 = 0;  // variable to store the value coming from the sensor 3
+float sensorValue4 = 0;  // variable to store the value coming from the sensor 4
+float sensorValue5 = 0;  // variable to store the value coming from the sensor 5
+
+
+
+// LittleFS
+#include "zlittlefs.h"
 
 
 // Temperature sensor
@@ -111,9 +122,23 @@ void setup() {
     sensorValue4 = bootCount;
     USBSerial.println("Boot number: " + String(bootCount));
     // Configuration du dsleep
-    esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-    USBSerial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+    // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+    // USBSerial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
   #endif
+
+
+  // Lit la config
+    USBSerial.println("\n\nLit la config\n");
+
+    #ifdef DEBUG
+      mountFS();
+      listDir(LittleFS, "/", 0);              // List the directories up to one level beginning at the root directory
+      readFile(LittleFS, "/config.json");     // Read the complete file
+    #endif
+
+
+    readConfig();
+
 
   // Start WIFI
   // zStartWifi();
