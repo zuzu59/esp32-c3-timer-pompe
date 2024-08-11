@@ -5,7 +5,7 @@
 //
 // ATTENTION, ce code a été testé sur un esp32-c3 super mini. Pas testé sur les autres boards !
 //
-#define zVERSION        "zf240810.1519"
+#define zVERSION        "zf240811.1202"
 #define zHOST           "tmr_pmp_1"             // ATTENTION, tout en minuscule
 #define zDSLEEP         1                       // 0 ou 1 !
 #define TIME_TO_SLEEP   60                      // dSleep en secondes 
