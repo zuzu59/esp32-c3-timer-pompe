@@ -5,10 +5,10 @@
 //
 // ATTENTION, ce code a été testé sur un esp32-c3 super mini. Pas testé sur les autres boards !
 //
-#define zVERSION        "zf240811.1405"
+#define zVERSION        "zf240811.1418"
 #define zHOST           "tmr_pmp_1"             // ATTENTION, tout en minuscule
 #define zDSLEEP         0                       // 0 ou 1 !
-#define TIME_TO_SLEEP   60                      // dSleep en secondes 
+#define TIME_TO_SLEEP   10                      // dSleep en secondes 
 int zDelay1Interval =   1000;                   // Délais en mili secondes pour la boucle loop
 
 /*
@@ -129,6 +129,40 @@ void loop() {
   zTimeToSleep++;
   USBSerial.print("zTimeToSleep:");
   USBSerial.println(zTimeToSleep);
+
+  if (zTimeToSleep >= TIME_TO_SLEEP) {
+
+    USBSerial.println("Boum, on a atteint le timer !");
+    zTimeToSleep = 0 ;
+
+    bootCount = 0 ;
+    saveVariables();
+
+    // Désactivation de tous les réveils possibles
+    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+
+    // Mettre l'ESP32-C3 en mode de veille profonde indéfiniment
+    esp_deep_sleep_start();
+
+    delay(300);                          //le temps de passer sur la Serial Monitor ;-)
+
+  }
+
+
+  if (bootCount > 1) {
+
+    USBSerial.println("Bam, on arrête la pompe !");
+
+    bootCount = 0 ;
+    saveVariables();
+
+    // Désactivation de tous les réveils possibles
+    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+
+    // Mettre l'ESP32-C3 en mode de veille profonde indéfiniment
+    esp_deep_sleep_start();
+
+  }
 
 
 
