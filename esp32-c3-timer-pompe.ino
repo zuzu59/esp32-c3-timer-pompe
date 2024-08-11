@@ -5,10 +5,10 @@
 //
 // ATTENTION, ce code a été testé sur un esp32-c3 super mini. Pas testé sur les autres boards !
 //
-#define zVERSION        "zf240811.1418"
+#define zVERSION        "zf240811.1527"
 #define zHOST           "tmr_pmp_1"             // ATTENTION, tout en minuscule
 #define zDSLEEP         0                       // 0 ou 1 !
-#define TIME_TO_SLEEP   10                      // dSleep en secondes 
+#define TIME_TO_SLEEP   120                      // dSleep en secondes 
 int zDelay1Interval =   1000;                   // Délais en mili secondes pour la boucle loop
 
 /*
@@ -61,6 +61,8 @@ https://chat.mistral.ai/    pour toute la partie API REST et wifiAuto ᕗ
 const int ledPin = 8;             // the number of the LED pin
 const int buttonPin = 9;          // the number of the pushbutton pin
 
+const int relayPin = 4;             // the number of the LED pin
+
 int bootCount = 0;
 int zTimeToSleep = 0;
 
@@ -74,6 +76,11 @@ int zTimeToSleep = 0;
 
 
 void setup() {
+
+  pinMode(relayPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
+
+
   // Pulse deux fois pour dire que l'on démarre
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW); delay(zSonarPulseOn); digitalWrite(ledPin, HIGH); delay(zSonarPulseOff);
@@ -95,6 +102,8 @@ void setup() {
   //   // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   //   // USBSerial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
   // #endif
+
+
 
   // Start EEPROM
   zStartEEPROM();
