@@ -5,11 +5,11 @@
 //
 // ATTENTION, ce code a été testé sur un esp32-c3 super mini. Pas testé sur les autres boards !
 //
-#define zVERSION        "zf240811.1348"
+#define zVERSION        "zf240811.1405"
 #define zHOST           "tmr_pmp_1"             // ATTENTION, tout en minuscule
 #define zDSLEEP         0                       // 0 ou 1 !
 #define TIME_TO_SLEEP   60                      // dSleep en secondes 
-int zDelay1Interval =   5000;                   // Délais en mili secondes pour la boucle loop
+int zDelay1Interval =   1000;                   // Délais en mili secondes pour la boucle loop
 
 /*
 Utilisation:
@@ -62,51 +62,18 @@ const int ledPin = 8;             // the number of the LED pin
 const int buttonPin = 9;          // the number of the pushbutton pin
 
 int bootCount = 0;
-float tempMoy = 0.0;
+int zTimeToSleep = 0;
 
 
 // Sonar Pulse
 #include "zSonarpulse.h"
 
 
-// // WIFI
-// #include "zWifi.h"
-
-
-// // OTA WEB server
-// #include "otaWebServer.h"
-
-
-// // MQTT
-// #include "zMqtt.h"
-
-float sensorValue1 = 0;  // variable to store the value coming from the sensor 1
-float sensorValue2 = 0;  // variable to store the value coming from the sensor 2
-float sensorValue3 = 0;  // variable to store the value coming from the sensor 3
-float sensorValue4 = 0;  // variable to store the value coming from the sensor 4
-float sensorValue5 = 0;  // variable to store the value coming from the sensor 5
-
-
-
 // zEeprom_tmrpmp
 #include "zEepromTmrPmp.h"
 
 
-// Temperature sensor
-#include "zTemperature.h"
-
-#if zDSLEEP == 1
-  // Deep Sleep
-  #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-  // #define TIME_TO_SLEEP  300      /* Time ESP32 will go to sleep (in seconds) */
-  RTC_DATA_ATTR int bootCount = 0;
-#endif
-
-
 void setup() {
-  // Il faut lire la température tout de suite au début avant que le MCU ne puisse chauffer !
-  readSensor();
-
   // Pulse deux fois pour dire que l'on démarre
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW); delay(zSonarPulseOn); digitalWrite(ledPin, HIGH); delay(zSonarPulseOff);
@@ -134,33 +101,18 @@ void setup() {
 
   loadVariables();
   bootCount++;
-  tempMoy = calculateAverageTemperature(); // Fonction hypothétique pour calculer la température moyenne
   saveVariables();
 
   USBSerial.print("Boot Count: ");
   USBSerial.println(bootCount);
-  USBSerial.print("Average Temperature: ");
-  USBSerial.println(tempMoy);
 
 
 
-  // Start WIFI
-  // zStartWifi();
-  // sensorValue3 = WiFi.RSSI();
-
-  // // Start OTA server
-  // otaWebServer();
-
-  // // Connexion au MQTT
-  // USBSerial.println("\n\nConnect MQTT !\n");
-  // ConnectMQTT();
 
   // go go go
   USBSerial.println("\nC'est parti !\n");
 
-  // Envoie toute la sauce !
-  zEnvoieTouteLaSauce();
-  USBSerial.println("\nC'est envoyé !\n");
+
 
   #if zDSLEEP == 1
     // Partie dsleep. On va dormir !
@@ -174,46 +126,14 @@ void setup() {
 }
 
 void loop() {
-  // Envoie toute la sauce !
-  // zEnvoieTouteLaSauce();
+  zTimeToSleep++;
+  USBSerial.print("zTimeToSleep:");
+  USBSerial.println(zTimeToSleep);
+
+
 
   // Délais non bloquant pour le sonarpulse et l'OTA
   zDelay1(zDelay1Interval);
-}
-
-
-// Envoie toute la sauce !
-void zEnvoieTouteLaSauce(){
-
-  USBSerial.print("bootCount:");
-  USBSerial.print(bootCount);
-
-
-
-  // Lit les températures
-  // readSensor();
-
-  // Envoie les mesures au MQTT
-  // sendSensorMqtt();
-
-  // Graphe sur l'Arduino IDE les courbes des mesures
-  // USBSerial.print("sensor1:");
-  // USBSerial.print(sensorValue1);
-  // USBSerial.print(",tempInternal1:");
-  // USBSerial.print(tempInternal1);
-  // USBSerial.print(",tempInternal2:");
-  // USBSerial.print(tempInternal2);
-
-  // USBSerial.print(",temp_HTU21D:");
-  // USBSerial.print(sensorValue5);
-  // USBSerial.print(",hum_HTU21D:");
-  // USBSerial.print(sensorValue2);
-
-  // USBSerial.print(",sensor3:");
-  // USBSerial.print(sensorValue3);
-  // USBSerial.print(",sensor4:");
-  // USBSerial.print(sensorValue4);
-  USBSerial.println("");
 }
 
 
@@ -221,8 +141,6 @@ void zEnvoieTouteLaSauce(){
 void zDelay1(long zDelayMili){
   long zDelay1NextMillis = zDelayMili + millis(); 
   while(millis() < zDelay1NextMillis ){
-    // OTA loop
-    // server.handleClient();
     // Un petit coup sonar pulse sur la LED pour dire que tout fonctionne bien
     sonarPulse();
   }
