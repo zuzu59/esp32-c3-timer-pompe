@@ -5,9 +5,9 @@
 //
 // ATTENTION, ce code a été testé sur un esp32-c3 super mini. Pas testé sur les autres boards !
 //
-#define zVERSION        "zf240811.1202"
+#define zVERSION        "zf240811.1348"
 #define zHOST           "tmr_pmp_1"             // ATTENTION, tout en minuscule
-#define zDSLEEP         1                       // 0 ou 1 !
+#define zDSLEEP         0                       // 0 ou 1 !
 #define TIME_TO_SLEEP   60                      // dSleep en secondes 
 int zDelay1Interval =   5000;                   // Délais en mili secondes pour la boucle loop
 
@@ -52,7 +52,7 @@ https://chat.mistral.ai/    pour toute la partie API REST et wifiAuto ᕗ
 
 
 
-#define DEBUG true
+// #define DEBUG true
 // #undef DEBUG
 
 
@@ -60,6 +60,9 @@ https://chat.mistral.ai/    pour toute la partie API REST et wifiAuto ᕗ
 // General
 const int ledPin = 8;             // the number of the LED pin
 const int buttonPin = 9;          // the number of the pushbutton pin
+
+int bootCount = 0;
+float tempMoy = 0.0;
 
 
 // Sonar Pulse
@@ -85,8 +88,8 @@ float sensorValue5 = 0;  // variable to store the value coming from the sensor 5
 
 
 
-// LittleFS
-#include "zlittlefs.h"
+// zEeprom_tmrpmp
+#include "zEepromTmrPmp.h"
 
 
 // Temperature sensor
@@ -113,31 +116,32 @@ void setup() {
   // Start serial console
   USBSerial.begin(19200);
   USBSerial.setDebugOutput(true);       //pour voir les messages de debug des libs sur la console série !
-  delay(3000);                          //le temps de passer sur la Serial Monitor ;-)
+  delay(300);                          //le temps de passer sur la Serial Monitor ;-)
   USBSerial.println("\n\n\n\n**************************************\nCa commence !"); USBSerial.println(zHOST ", " zVERSION);
 
-  #if zDSLEEP == 1
-    //Increment boot number and print it every reboot
-    ++bootCount;
-    sensorValue4 = bootCount;
-    USBSerial.println("Boot number: " + String(bootCount));
-    // Configuration du dsleep
-    // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-    // USBSerial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
-  #endif
+  // #if zDSLEEP == 1
+  //   //Increment boot number and print it every reboot
+  //   ++bootCount;
+  //   sensorValue4 = bootCount;
+  //   USBSerial.println("Boot number: " + String(bootCount));
+  //   // Configuration du dsleep
+  //   // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  //   // USBSerial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
+  // #endif
 
+  // Start EEPROM
+  zStartEEPROM();
 
-  // Lit la config
-    USBSerial.println("\n\nLit la config\n");
+  loadVariables();
+  bootCount++;
+  tempMoy = calculateAverageTemperature(); // Fonction hypothétique pour calculer la température moyenne
+  saveVariables();
 
-    #ifdef DEBUG
-      mountFS();
-      listDir(LittleFS, "/", 0);              // List the directories up to one level beginning at the root directory
-      readFile(LittleFS, "/config.json");     // Read the complete file
-    #endif
+  USBSerial.print("Boot Count: ");
+  USBSerial.println(bootCount);
+  USBSerial.print("Average Temperature: ");
+  USBSerial.println(tempMoy);
 
-    // saveConfig();
-    readConfig();
 
 
   // Start WIFI
